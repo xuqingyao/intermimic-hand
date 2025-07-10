@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=5,6,7,8 python intermimic/run.py --task InterMimicG1 --cfg_env intermimic/data/cfg/omomo_g1_29dof_with_hand.yaml --cfg_train intermimic/data/cfg/train/rlg/omomo_g1_29dof_with_hand.yaml --headless --output checkpoints
