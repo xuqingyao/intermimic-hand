@@ -20,19 +20,21 @@ env:
   dataFramesScale: 1 # 25->30fps
   dataSub: ['sub2']
   ballSize: 1.
-  numObs: 4229
+  numObs: 2029
   numDoF: 43
   numDoFWrist: 3
   numDoFHand: 7
   g1: True
-  motion_file: /home/ubuntu/qingyaoxu/PHC/data/g1hand/v1/omomo_all.pkl
+  motion_file: /home/ubuntu/qingyaoxu/PHC/data/g1hand/v1/omomo_filter.pkl
   robotType: 'g1/g1_29dof_with_hand_rev_1_0.urdf'
   objectDensity: 25
   localRootObs: False
-  keyBodies: ['pelvis', 'left_hip_pitch_link', 'left_hip_roll_link', 'left_hip_yaw_link', 'left_knee_link', 'left_ankle_pitch_link', 'left_ankle_roll_link', 'right_hip_pitch_link', 'right_hip_roll_link', 'right_hip_yaw_link', 'right_knee_link', 'right_ankle_pitch_link', 'right_ankle_roll_link', 'waist_yaw_link', 'waist_roll_link', 'torso_link', 'left_shoulder_pitch_link', 'left_shoulder_roll_link', 'left_shoulder_yaw_link', 'left_elbow_link', 'left_wrist_roll_link', 'left_wrist_pitch_link', 'left_wrist_yaw_link', 'left_hand_thumb_0_link', 'left_hand_thumb_1_link', 'left_hand_thumb_2_link', 'left_hand_middle_0_link', 'left_hand_middle_1_link', 'left_hand_index_0_link', 'left_hand_index_1_link', 'right_shoulder_pitch_link', 'right_shoulder_roll_link', 'right_shoulder_yaw_link', 'right_elbow_link', 'right_wrist_roll_link', 'right_wrist_pitch_link', 'right_wrist_yaw_link', 'right_hand_thumb_0_link', 'right_hand_thumb_1_link', 'right_hand_thumb_2_link', 'right_hand_middle_0_link', 'right_hand_middle_1_link', 'right_hand_index_0_link', 'right_hand_index_1_link']
-  keyIndex: [0, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25, 26, 27, 33, 34, 35, 31, 32, 29, 30, 38, 39, 40, 41, 42, 43, 44, 50, 51, 52, 48, 49, 46, 47]
-  contactBodies: ['pelvis', 'left_hip_pitch_link', 'left_hip_roll_link', 'left_hip_yaw_link', 'left_knee_link', 'left_ankle_pitch_link', 'left_ankle_roll_link', 'right_hip_pitch_link', 'right_hip_roll_link', 'right_hip_yaw_link', 'right_knee_link', 'right_ankle_pitch_link', 'right_ankle_roll_link', 'waist_yaw_link', 'waist_roll_link', 'torso_link', 'left_shoulder_pitch_link', 'left_shoulder_roll_link', 'left_shoulder_yaw_link', 'left_elbow_link', 'left_wrist_roll_link', 'left_wrist_pitch_link', 'left_wrist_yaw_link', 'left_hand_thumb_0_link', 'left_hand_thumb_1_link', 'left_hand_thumb_2_link', 'left_hand_middle_0_link', 'left_hand_middle_1_link', 'left_hand_index_0_link', 'left_hand_index_1_link', 'right_shoulder_pitch_link', 'right_shoulder_roll_link', 'right_shoulder_yaw_link', 'right_elbow_link', 'right_wrist_roll_link', 'right_wrist_pitch_link', 'right_wrist_yaw_link', 'right_hand_thumb_0_link', 'right_hand_thumb_1_link', 'right_hand_thumb_2_link', 'right_hand_middle_0_link', 'right_hand_middle_1_link', 'right_hand_index_0_link', 'right_hand_index_1_link']
-  contactIndex: [0, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25, 26, 27, 33, 34, 35, 31, 32, 29, 30, 38, 39, 40, 41, 42, 43, 44, 50, 51, 52, 48, 49, 46, 47]
+  # MapBodies: ['pelvis', 'left_hip_pitch_link', 'left_hip_roll_link', 'left_hip_yaw_link', 'left_knee_link', 'left_ankle_pitch_link', 'left_ankle_roll_link', 'right_hip_pitch_link', 'right_hip_roll_link', 'right_hip_yaw_link', 'right_knee_link', 'right_ankle_pitch_link', 'right_ankle_roll_link', 'waist_yaw_link', 'waist_roll_link', 'torso_link', 'left_shoulder_pitch_link', 'left_shoulder_roll_link', 'left_shoulder_yaw_link', 'left_elbow_link', 'left_wrist_roll_link', 'left_wrist_pitch_link', 'left_wrist_yaw_link', 'left_hand_thumb_0_link', 'left_hand_thumb_1_link', 'left_hand_thumb_2_link', 'left_hand_middle_0_link', 'left_hand_middle_1_link', 'left_hand_index_0_link', 'left_hand_index_1_link', 'right_shoulder_pitch_link', 'right_shoulder_roll_link', 'right_shoulder_yaw_link', 'right_elbow_link', 'right_wrist_roll_link', 'right_wrist_pitch_link', 'right_wrist_yaw_link', 'right_hand_thumb_0_link', 'right_hand_thumb_1_link', 'right_hand_thumb_2_link', 'right_hand_middle_0_link', 'right_hand_middle_1_link', 'right_hand_index_0_link', 'right_hand_index_1_link']
+  # MapIndex: [0, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25, 26, 27, 33, 34, 35, 31, 32, 29, 30, 38, 39, 40, 41, 42, 43, 44, 50, 51, 52, 48, 49, 46, 47]
+  keyBodies: ['left_hip_yaw_link', 'left_knee_link', 'left_ankle_roll_link', 'right_hip_yaw_link', 'right_knee_link', 'right_ankle_roll_link', 'torso_link', 'left_shoulder_yaw_link', 'left_elbow_link', 'left_wrist_yaw_link', 'left_hand_index_1_link', 'left_hand_middle_1_link', 'left_hand_thumb_2_link', 'right_shoulder_yaw_link', 'right_elbow_link', 'right_wrist_yaw_link', 'right_hand_index_1_link', 'right_hand_middle_1_link', 'right_hand_thumb_2_link']
+  keyIndex: [3, 4, 6, 9, 10, 12, 15, 18, 19, 22, 29, 27, 25, 32, 33, 36, 43, 41, 39]
+  contactBodies: ['left_hip_yaw_link', 'left_knee_link', 'left_ankle_roll_link', 'right_hip_yaw_link', 'right_knee_link', 'right_ankle_roll_link', 'torso_link', 'left_shoulder_yaw_link', 'left_elbow_link', 'left_wrist_yaw_link', 'left_hand_index_1_link', 'left_hand_middle_1_link', 'left_hand_thumb_2_link', 'right_shoulder_yaw_link', 'right_elbow_link', 'right_wrist_yaw_link', 'right_hand_index_1_link', 'right_hand_middle_1_link', 'right_hand_thumb_2_link']
+  contactIndex: [3, 4, 6, 9, 10, 12, 15, 18, 19, 22, 29, 27, 25, 32, 33, 36, 43, 41, 39]  
   terminationHeight: 0.15
   enableEarlyTermination: True
   scaling: 0.75

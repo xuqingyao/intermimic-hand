@@ -283,11 +283,11 @@ class InterMimicG1(Humanoid_G1, InterMimic):
     def compute_humanoid_reward(self, w):
         # body pos reward
         len_keypos = len(self._key_body_ids_gt)
-        # key_pos = self.extract_data_component('body_pos', obs=self._curr_obs).view(self._curr_obs.shape[0], -1, 3)[:, self._key_body_ids_gt]
-        key_pos = self.extract_data_component('body_pos', obs=self._curr_obs).view(self._curr_obs.shape[0], -1, 3)
+        key_pos = self.extract_data_component('body_pos', obs=self._curr_obs).view(self._curr_obs.shape[0], -1, 3)[:, self._key_body_ids_gt]
+        # key_pos = self.extract_data_component('body_pos', obs=self._curr_obs).view(self._curr_obs.shape[0], -1, 3)
         
-        # ref_key_pos = self.extract_data_component('body_pos', obs=self._curr_ref_obs).view(self._curr_ref_obs.shape[0], -1, 3)[:, self._key_body_ids_gt]
-        ref_key_pos = self.extract_data_component('body_pos', obs=self._curr_ref_obs).view(self._curr_ref_obs.shape[0], -1, 3)
+        ref_key_pos = self.extract_data_component('body_pos', obs=self._curr_ref_obs).view(self._curr_ref_obs.shape[0], -1, 3)[:, self._key_body_ids_gt]
+        # ref_key_pos = self.extract_data_component('body_pos', obs=self._curr_ref_obs).view(self._curr_ref_obs.shape[0], -1, 3)
         
         ref_ig = self.extract_data_component('ig', obs=self._curr_ref_obs).view(self._curr_ref_obs.shape[0], -1, 3)
         ref_ig_norm = ref_ig.norm(dim=-1)
@@ -296,8 +296,8 @@ class InterMimicG1(Humanoid_G1, InterMimic):
         ancle_toe_ids = [i+1 for i in range(len_keypos) if 'ankle' in self.key_bodies[i] or 'toe' in self.key_bodies[i]]
         weight_hp[:, ancle_toe_ids] = 1
 
-        # ep = torch.mean(((ref_key_pos - key_pos)**2).sum(dim=-1) * weight_hp[:, self._key_body_ids_gt],dim=-1)
-        ep = torch.mean(((ref_key_pos - key_pos)**2).sum(dim=-1) * weight_hp,dim=-1)
+        ep = torch.mean(((ref_key_pos - key_pos)**2).sum(dim=-1) * weight_hp[:, self._key_body_ids_gt],dim=-1)
+        # ep = torch.mean(((ref_key_pos - key_pos)**2).sum(dim=-1) * weight_hp,dim=-1)
         rp = torch.exp(-ep*w['p'])
 
         body_rot = self.extract_data_component('body_rot', obs=self._curr_obs).view(self._curr_obs.shape[0], -1, 4)
@@ -374,7 +374,7 @@ class InterMimicG1(Humanoid_G1, InterMimic):
                                                 heading_inv_rot_expand.shape[2])
         
         # _ref_body_pos = self.extract_data_component('body_pos', obs=ref_obs).view(ref_obs.shape[0], -1, 3)[:, key_body_ids_gt, :]
-        _ref_body_pos = self.extract_data_component('body_pos', obs=ref_obs).view(ref_obs.shape[0], -1, 3)
+        _ref_body_pos = self.extract_data_component('body_pos', obs=ref_obs).view(ref_obs.shape[0], -1, 3)[:, key_body_ids_gt, :]
         _body_pos = body_pos[:, key_body_ids, :]
 
         diff_global_body_pos = _ref_body_pos - _body_pos
@@ -397,7 +397,7 @@ class InterMimicG1(Humanoid_G1, InterMimic):
         
         ref_body_rot = self.extract_data_component('body_rot', obs=ref_obs).view(ref_obs.shape[0], -1, 4)
         # ref_body_rot_no_hand = ref_body_rot[:, key_body_ids_gt, :]
-        ref_body_rot_no_hand = ref_body_rot
+        ref_body_rot_no_hand = ref_body_rot[:, key_body_ids_gt, :]
         body_rot_no_hand = body_rot[:, key_body_ids]
 
         diff_global_body_rot = torch_utils.quat_mul_norm(torch_utils.quat_inverse(ref_body_rot_no_hand.reshape(-1, 4)), body_rot_no_hand.reshape(-1, 4))
@@ -409,14 +409,14 @@ class InterMimicG1(Humanoid_G1, InterMimic):
         local_ref_body_rot = torch_utils.quat_to_tan_norm(local_ref_body_rot).view(ref_body_rot_no_hand.shape[0], -1)
 
         # ref_body_vel = self.extract_data_component('body_pos_vel', obs=ref_obs).view(ref_obs.shape[0], -1, 3)[:, key_body_ids_gt, :]
-        ref_body_vel = self.extract_data_component('body_pos_vel', obs=ref_obs).view(ref_obs.shape[0], -1, 3)
+        ref_body_vel = self.extract_data_component('body_pos_vel', obs=ref_obs).view(ref_obs.shape[0], -1, 3)[:, key_body_ids_gt, :]
         _body_vel = body_vel[:, key_body_ids, :]
         diff_global_vel = ref_body_vel - _body_vel
         diff_local_vel = torch_utils.quat_rotate(flat_heading_rot_2, diff_global_vel.view(-1, 3)).view(-1, len_keypos * 3)
 
         ref_body_ang_vel = self.extract_data_component('body_rot_vel', obs=ref_obs)
         # ref_body_ang_vel_no_hand = ref_body_ang_vel.view(-1, 52, 3)[:, key_body_ids_gt]
-        ref_body_ang_vel_no_hand = ref_body_ang_vel.view(-1, 44, 3)
+        ref_body_ang_vel_no_hand = ref_body_ang_vel.view(-1, 44, 3)[:, key_body_ids_gt]
         body_ang_vel_no_hand = body_ang_vel[:, key_body_ids]
         diff_global_ang_vel = ref_body_ang_vel_no_hand - body_ang_vel_no_hand
         diff_local_ang_vel = torch_utils.quat_rotate(flat_heading_rot, diff_global_ang_vel.view(-1, 3)).view(-1, len_keypos * 3)
@@ -436,7 +436,7 @@ class InterMimicG1(Humanoid_G1, InterMimic):
         body_contact_buf = contact_forces[:, contact_body_ids, :].clone() #.view(contact_forces.shape[0],-1)
         contact = torch.any(torch.abs(body_contact_buf) > 0.1, dim=-1).float()
         # ref_body_contact = self.extract_data_component('contact_human', obs=ref_obs)[:, contact_body_ids_gt]
-        ref_body_contact = self.extract_data_component('contact_human', obs=ref_obs)
+        ref_body_contact = self.extract_data_component('contact_human', obs=ref_obs)[:, contact_body_ids_gt]
         diff_body_contact = ref_body_contact * ((ref_body_contact + 1) / 2 - contact)
 
         obs = torch.cat((root_h_obs, local_body_pos, local_body_rot_obs, local_body_vel, local_body_ang_vel, contact, diff_local_body_pos_flat, diff_local_body_rot_obs, diff_body_contact, local_ref_body_pos, local_ref_body_rot, diff_local_vel, diff_local_ang_vel), dim=-1)
@@ -497,11 +497,12 @@ class InterMimicG1(Humanoid_G1, InterMimic):
         ig = self.ig[env_ids]
         ig_norm = ig.norm(dim=-1, keepdim=True)
         ig_all = ig / (ig_norm + 1e-6) * (-5 * ig_norm).exp()
-        ig = ig_all[:, self._key_body_ids, :].view(env_ids.shape[0], -1)
+        # ig = ig_all[:, self._key_body_ids, :].view(env_ids.shape[0], -1)
+        ig = ig_all[:, self._key_body_ids_gt, :].view(env_ids.shape[0], -1)
         ig_all = ig_all.view(env_ids.shape[0], -1)    
         ref_ig = self.extract_data_component('ig', obs=ref_obs)
-        # ref_ig = ref_ig.view(ref_obs.shape[0], -1, 3)[:, self._key_body_ids_gt, :]
-        ref_ig = ref_ig.view(ref_obs.shape[0], -1, 3)
+        ref_ig = ref_ig.view(ref_obs.shape[0], -1, 3)[:, self._key_body_ids_gt, :]
+        # ref_ig = ref_ig.view(ref_obs.shape[0], -1, 3)
         ref_ig_norm = ref_ig.norm(dim=-1, keepdim=True)
         ref_ig = ref_ig / (ref_ig_norm + 1e-6) * (-5 * ref_ig_norm).exp()  
         ref_ig = ref_ig.view(env_ids.shape[0], -1)
@@ -561,31 +562,31 @@ class InterMimicG1(Humanoid_G1, InterMimic):
         dof_pos_new[:, :dof_pos.shape[1]] = dof_pos        
         dof_vel_new[:, :dof_vel.shape[1]] = dof_vel  
        
-        # contact_new = torch.zeros((root_pos.shape[0], 44), device=root_pos.device) 
-        # contact_new[:, _contact_body_ids_gt] = contact[:, _contact_body_ids]
-        # body_pos_new = torch.zeros((root_pos.shape[0], 44, 3), device=root_pos.device) 
-        # body_vel_new = torch.zeros((root_pos.shape[0], 44, 3), device=root_pos.device)
-        # ig_new = torch.zeros((root_pos.shape[0], 44, 3), device=root_pos.device)
-        # body_pos_new[:, _key_body_ids_gt] = body_pos[:, _key_body_ids]
-        # body_vel_new[:, _key_body_ids_gt] = body_vel[:, _key_body_ids]
-        # ig_new[:, _key_body_ids_gt] = ig[:, _key_body_ids]
-        # body_rot_new = torch.zeros((root_pos.shape[0], 44, 4), device=root_pos.device) 
-        # body_rot_vel_new = torch.zeros((root_pos.shape[0], 44, 3), device=root_pos.device) 
-        # body_rot_new[:, _key_body_ids_gt] = body_rot[:, _key_body_ids]
-        # body_rot_vel_new[:, _key_body_ids_gt] = body_rot_vel[:, _key_body_ids]
-        
         contact_new = torch.zeros((root_pos.shape[0], 44), device=root_pos.device) 
-        contact_new = contact[:, _contact_body_ids]
+        contact_new[:, _contact_body_ids_gt] = contact[:, _contact_body_ids]
         body_pos_new = torch.zeros((root_pos.shape[0], 44, 3), device=root_pos.device) 
         body_vel_new = torch.zeros((root_pos.shape[0], 44, 3), device=root_pos.device)
         ig_new = torch.zeros((root_pos.shape[0], 44, 3), device=root_pos.device)
-        body_pos_new = body_pos[:, _key_body_ids]
-        body_vel_new = body_vel[:, _key_body_ids]
-        ig_new = ig[:, _key_body_ids]
+        body_pos_new[:, _key_body_ids_gt] = body_pos[:, _key_body_ids]
+        body_vel_new[:, _key_body_ids_gt] = body_vel[:, _key_body_ids]
+        ig_new[:, _key_body_ids_gt] = ig[:, _key_body_ids]
         body_rot_new = torch.zeros((root_pos.shape[0], 44, 4), device=root_pos.device) 
         body_rot_vel_new = torch.zeros((root_pos.shape[0], 44, 3), device=root_pos.device) 
-        body_rot_new = body_rot[:, _key_body_ids]
-        body_rot_vel_new = body_rot_vel[:, _key_body_ids]
+        body_rot_new[:, _key_body_ids_gt] = body_rot[:, _key_body_ids]
+        body_rot_vel_new[:, _key_body_ids_gt] = body_rot_vel[:, _key_body_ids]
+        
+        # contact_new = torch.zeros((root_pos.shape[0], 44), device=root_pos.device) 
+        # contact_new = contact[:, _contact_body_ids]
+        # body_pos_new = torch.zeros((root_pos.shape[0], 44, 3), device=root_pos.device) 
+        # body_vel_new = torch.zeros((root_pos.shape[0], 44, 3), device=root_pos.device)
+        # ig_new = torch.zeros((root_pos.shape[0], 44, 3), device=root_pos.device)
+        # body_pos_new = body_pos[:, _key_body_ids]
+        # body_vel_new = body_vel[:, _key_body_ids]
+        # ig_new = ig[:, _key_body_ids]
+        # body_rot_new = torch.zeros((root_pos.shape[0], 44, 4), device=root_pos.device) 
+        # body_rot_vel_new = torch.zeros((root_pos.shape[0], 44, 3), device=root_pos.device) 
+        # body_rot_new = body_rot[:, _key_body_ids]
+        # body_rot_vel_new = body_rot_vel[:, _key_body_ids]
 
         obs = torch.cat((root_pos, root_rot, dof_pos_new, dof_vel_new, 
                          body_pos_new.view(body_pos_new.shape[0],-1), 

@@ -144,6 +144,15 @@ def load_cfg(args):
 
     cfg["args"] = args
 
+    if args.sub != "":
+        cfg["env"]["dataSub"] = [args.sub]
+    if len(cfg["env"]["dataSub"]) == 1:
+        ori_name = cfg_train["params"]["config"]["full_experiment_name"] 
+        new_name = ori_name + '_' + cfg["env"]["dataSub"][0]
+        cfg_train["params"]["config"]["full_experiment_name"] = new_name
+        new_path = cfg_train["params"]["config"]["resume_from"].replace(ori_name, new_name)
+        cfg_train["params"]["config"]["resume_from"] = new_path
+        print( cfg_train["params"]["config"]["full_experiment_name"], cfg_train["params"]["config"]["resume_from"])
     return cfg, cfg_train, logdir
 
 
@@ -248,6 +257,8 @@ def get_args(benchmark=False):
             "help": "Apply additional PyTorch settings for more deterministic behaviour"},
         {"name": "--output_path", "type": str, "default": "output/", "help": "Specify output directory"},
         {"name": "--llc_checkpoint", "type": str, "default": "",
+            "help": "Path to the saved weights for the low-level controller of an HRL agent."},
+        {"name": "--sub", "type": str, "default": "",
             "help": "Path to the saved weights for the low-level controller of an HRL agent."}]
 
     if benchmark:
