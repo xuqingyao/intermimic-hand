@@ -172,8 +172,8 @@ class InterMimicAgent(common_agent.CommonAgent):
             self.current_rewards = self.current_rewards * not_dones.unsqueeze(1)
             self.current_lengths = self.current_lengths * not_dones
             
-            if (self.vec_env.env.task.viewer):
-                self._amp_debug(infos)
+            # if (self.vec_env.env.task.viewer):
+            #     self._amp_debug(infos)
                 
             self.done_indices = self.done_indices[:, 0]
 

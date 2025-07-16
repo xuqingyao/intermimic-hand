@@ -25,7 +25,7 @@ env:
   numDoFWrist: 3
   numDoFHand: 7
   g1: True
-  motion_file: /home/ubuntu/qingyaoxu/PHC/data/g1hand/v1/omomo_filter.pkl
+  motion_file: /media/magic-4090/DATA1/PHC/data/g1hand/v1/omomo_filter.pkl
   robotType: 'g1/g1_29dof_with_hand.urdf'
   objectDensity: 200
   localRootObs: False
