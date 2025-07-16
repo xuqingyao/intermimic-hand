@@ -334,10 +334,12 @@ class InterMimic(Humanoid_SMPLX):
 
         props = self.gym.get_actor_rigid_shape_properties(env_ptr, target_handle)
         for p_idx in range(len(props)):
-            props[p_idx].restitution = 0.6
-            props[p_idx].friction = 0.8
+            props[p_idx].restitution = 0.05
+            props[p_idx].friction = 0.6
             props[p_idx].rolling_friction = 0.01
-            props[p_idx].torsion_friction = 0.8
+            props[p_idx].torsion_friction = 0.01
+            if self.object_name[env_id % len(self.object_name)] == 'plasticbox' or self.object_name[env_id % len(self.object_name)] == 'trashcan':
+                props[p_idx].rest_offset = 0.015
         self.gym.set_actor_rigid_shape_properties(env_ptr, target_handle, props)
 
         self._target_handles.append(target_handle)
@@ -653,9 +655,18 @@ class InterMimic(Humanoid_SMPLX):
         next_ts = torch.clamp(ts + delta_t, max=self.max_episode_length[self.data_id[env_ids]]-1)
         ref_obs = hoi_data[self.data_id[env_ids], next_ts].clone()
         obs = self._compute_humanoid_obs(env_ids, ref_obs, next_ts)
+        invalid_obs = ~torch.isfinite(obs)  # True where obs is NaN or infinite
+        if torch.any(invalid_obs):
+            print('invalid humanoid')
         task_obs = self._compute_task_obs(env_ids, ref_obs)
+        invalid_obs = ~torch.isfinite(task_obs)  # True where obs is NaN or infinite
+        if torch.any(invalid_obs):
+            print('invalid task')
         obs = torch.cat([obs, task_obs], dim=-1)    
         ig_all, ig, ref_ig = self._compute_ig_obs(env_ids, ref_obs)
+        invalid_obs = ~torch.isfinite(ig_all)  # True where obs is NaN or infinite
+        if torch.any(invalid_obs):
+            print('invalid ig')
         return torch.cat((obs,ig_all,ref_ig-ig),dim=-1)
         
     def _compute_ig_obs(self, env_ids, ref_obs):

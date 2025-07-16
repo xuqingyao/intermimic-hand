@@ -114,6 +114,8 @@ class InterMimicAgent(common_agent.CommonAgent):
         for n in range(self.horizon_length):
 
             self.obs = self.env_reset(self.done_indices)
+            invalid_obs = ~torch.isfinite(self.obs['obs'])  # True where obs is NaN or infinite
+            invalid_batches = torch.any(invalid_obs, dim=1)  # Check if any invalid number in each batch (B, N)
 
             self.experience_buffer.update_data('obses', n, self.obs['obs'])
 
@@ -141,7 +143,8 @@ class InterMimicAgent(common_agent.CommonAgent):
             # Set self.dones to True for batches with invalid observations
                 self.dones[invalid_batches] = True
                 infos['terminate'][invalid_batches] = True
-
+                rewards[invalid_batches] = 0    
+                
             shaped_rewards = self.rewards_shaper(rewards)
             # shaped_rewards = shaped_rewards * (((res_dict['actions'] - res_dict['mus'])**2).sum(dim=-1).mul(-0.01).exp().unsqueeze(-1))
             self.experience_buffer.update_data('rewards', n, shaped_rewards)
@@ -353,7 +356,12 @@ class InterMimicAgent(common_agent.CommonAgent):
             'prev_actions': actions_batch, 
             'obs' : obs_batch
         }
-
+        invalid_obs = ~torch.isfinite(obs_batch)  # True where obs is NaN or infinite
+        if torch.any(invalid_obs):
+            print("Gradients obs")
+        invalid_act = ~torch.isfinite(actions_batch)  # True where obs is NaN or infinite
+        if torch.any(invalid_act):
+            print("Gradients act")    
         rnn_masks = None
         if self.is_rnn:
             rnn_masks = input_dict['rnn_masks']

@@ -265,6 +265,7 @@ class InterMimicG1(Humanoid_G1, InterMimic):
         rig, ig_reset = self.compute_ig_reward(self.reward_weights, key_pos, ref_key_pos, obj_points, ref_obj_points)
         rcg, contact_reset = self.compute_cg_reward(self.reward_weights)
         self.rew_buf[:] = rb * ro * rig * rcg
+        # self.rew_buf[:] = rb * ro * rig
         kinematic_reset = torch.logical_or(human_reset, object_reset)
         self.contact_reset = (self.contact_reset + contact_reset) * contact_reset
         self.kinematic_reset = torch.logical_or(ig_reset, kinematic_reset)
@@ -293,26 +294,26 @@ class InterMimicG1(Humanoid_G1, InterMimic):
         ref_ig_norm = ref_ig.norm(dim=-1)
         weight_h = (-5 * ref_ig_norm).exp()
         weight_hp = weight_h.clone().detach()  
-        ancle_toe_ids = [i+1 for i in range(len_keypos) if 'ankle' in self.key_bodies[i] or 'toe' in self.key_bodies[i]]
+        ancle_toe_ids = [i for i in range(len_keypos) if 'ankle' in self.key_bodies[i] or 'toe' in self.key_bodies[i]]
         weight_hp[:, ancle_toe_ids] = 1
 
         ep = torch.mean(((ref_key_pos - key_pos)**2).sum(dim=-1) * weight_hp[:, self._key_body_ids_gt],dim=-1)
         # ep = torch.mean(((ref_key_pos - key_pos)**2).sum(dim=-1) * weight_hp,dim=-1)
         rp = torch.exp(-ep*w['p'])
 
-        body_rot = self.extract_data_component('body_rot', obs=self._curr_obs).view(self._curr_obs.shape[0], -1, 4)
-        ref_body_rot = self.extract_data_component('body_rot', obs=self._curr_ref_obs).view(self._curr_ref_obs.shape[0], -1, 4)
+        body_rot = self.extract_data_component('body_rot', obs=self._curr_obs).view(self._curr_obs.shape[0], -1, 4)[:, self._key_body_ids_gt]
+        ref_body_rot = self.extract_data_component('body_rot', obs=self._curr_ref_obs).view(self._curr_ref_obs.shape[0], -1, 4)[:, self._key_body_ids_gt]
         diff_quat_data = torch_utils.quat_mul_norm(torch_utils.quat_inverse(ref_body_rot.reshape(-1, 4)), body_rot.reshape(-1, 4))
         diff_angle, diff_axis = torch_utils.quat_to_angle_axis(diff_quat_data)
         # diff = diff_angle.view(-1, 52)
-        diff = diff_angle.view(-1, 44)
+        diff = diff_angle.view(-1, 19)
         weight_hr = 1 - weight_h
         
-        er = torch.mean(diff[:, :] * weight_hr, dim=-1)
+        er = torch.mean(diff[:, :] * weight_hr[:, self._key_body_ids_gt], dim=-1)
         rr = torch.exp(-er*w['r'])
         
-        body_pos_vel = self.extract_data_component('body_pos_vel', obs=self._curr_obs)
-        ref_body_pos_vel = self.extract_data_component('body_pos_vel', obs=self._curr_ref_obs)
+        body_pos_vel = self.extract_data_component('body_pos_vel', obs=self._curr_obs)[:, self._key_body_ids_gt]
+        ref_body_pos_vel = self.extract_data_component('body_pos_vel', obs=self._curr_ref_obs)[:, self._key_body_ids_gt]
         # body pos vel reward
         epv = torch.mean((ref_body_pos_vel - body_pos_vel)**2,dim=-1)
         # epv = torch.mean(pos_vel ,dim=-1) # torch.zeros_like(ep)
