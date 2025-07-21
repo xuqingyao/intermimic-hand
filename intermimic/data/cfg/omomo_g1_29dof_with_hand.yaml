@@ -2,7 +2,7 @@
 env: 
   numEnvs: 2048
   envSpacing: 1.5
-  episodeLength: 1000
+  episodeLength: 300
   isFlagrun: False
   enableDebugVis: False
   playdataset: False
@@ -25,7 +25,7 @@ env:
   numDoFWrist: 3
   numDoFHand: 7
   g1: True
-  motion_file: /media/magic-4090/DATA1/PHC/data/g1hand/v1/omomo_filter.pkl
+  motion_file: /home/ubuntu/qingyaoxu/PHC/data/g1hand/v1/omomo_filter.pkl
   robotType: 'g1/g1_29dof_with_hand.urdf'
   objectDensity: 200
   localRootObs: False
@@ -35,9 +35,9 @@ env:
   keyIndex: [3, 4, 6, 9, 10, 12, 15, 18, 19, 22, 29, 27, 25, 32, 33, 36, 43, 41, 39]
   contactBodies: ['left_hip_yaw_link', 'left_knee_link', 'left_ankle_roll_link', 'right_hip_yaw_link', 'right_knee_link', 'right_ankle_roll_link', 'torso_link', 'left_shoulder_yaw_link', 'left_elbow_link', 'left_wrist_yaw_link', 'left_hand_index_1_link', 'left_hand_middle_1_link', 'left_hand_thumb_2_link', 'right_shoulder_yaw_link', 'right_elbow_link', 'right_wrist_yaw_link', 'right_hand_index_1_link', 'right_hand_middle_1_link', 'right_hand_thumb_2_link']
   contactIndex: [3, 4, 6, 9, 10, 12, 15, 18, 19, 22, 29, 27, 25, 32, 33, 36, 43, 41, 39]  
-  terminationHeight: 0.15
+  terminationHeight: 0.3
   enableEarlyTermination: True
-  scaling: 0.75
+  scaling: 1
   initRootHeight: 0.94
 
   asset:
@@ -109,3 +109,26 @@ sim:
     num_inner_iterations: 10
     warm_start: 0.25
 
+control:
+  stiffness:
+    hip_yaw: 100
+    hip_roll: 100
+    hip_pitch: 150
+    knee: 150
+    ankle: 20
+    shoulder: 40
+    waist: 150
+    elbow: 40
+    wrist: 20
+    hand: 20
+  damping:
+    hip_yaw: 5
+    hip_roll: 5
+    hip_pitch: 5
+    knee: 5
+    ankle: 4
+    shoulder: 5
+    waist: 5
+    elbow: 5
+    wrist: 2
+    hand: 2

@@ -12,6 +12,8 @@ class Humanoid_G1(Humanoid_SMPLX):
     def __init__(self, cfg, sim_params, physics_engine, device_type, device_id, headless):
         self._key_body_ids_gt = to_torch(cfg["env"]["keyIndex"], device='cuda', dtype=torch.long)
         self._contact_body_ids_gt = to_torch(cfg["env"]["contactIndex"], device='cuda', dtype=torch.long)
+        self._stiffness  = cfg["control"]["stiffness"]
+        self._damping = cfg["control"]["damping"]
         super().__init__(cfg=cfg,
                          sim_params=sim_params,
                          physics_engine=physics_engine,
@@ -114,8 +116,48 @@ class Humanoid_G1(Humanoid_SMPLX):
         if (self._pd_control):
             dof_prop = self.gym.get_asset_dof_properties(humanoid_asset)
             dof_prop["driveMode"] = gymapi.DOF_MODE_POS
-            dof_prop["stiffness"] = [500 for _ in range(12)] + [300 for _ in range(7)] + [200 for _ in range(self._num_actions_wrist)] + [100 for _ in range(self._num_actions_hand)] + [300 for _ in range(4)] + [200 for _ in range(self._num_actions_wrist)] + [100 for _ in range(self._num_actions_hand)]
-            dof_prop["damping"] = [50 for _ in range(12)] + [30 for _ in range(7)] + [20 for _ in range(self._num_actions_wrist)] + [10 for _ in range(self._num_actions_hand)] + [30 for _ in range(4)] + [20 for _ in range(self._num_actions_wrist)] + [10 for _ in range(self._num_actions_hand)]
+            dof_names = self.gym.get_asset_dof_names(humanoid_asset)
+            for i, dof_name in enumerate(dof_names):
+                stiffness = 0.0
+                damping = 0.0
+
+                if "hip_yaw" in dof_name:
+                    stiffness = self._stiffness["hip_yaw"]
+                    damping = self._damping["hip_yaw"]
+                elif "hip_roll" in dof_name:
+                    stiffness = self._stiffness["hip_roll"]
+                    damping = self._damping["hip_roll"]
+                elif "hip_pitch" in dof_name:
+                    stiffness = self._stiffness["hip_pitch"]
+                    damping = self._damping["hip_pitch"]
+                elif "knee" in dof_name:
+                    stiffness = self._stiffness["knee"]
+                    damping = self._damping["knee"]
+                elif "ankle" in dof_name:
+                    stiffness = self._stiffness["ankle"]
+                    damping = self._damping["ankle"]
+                elif "shoulder" in dof_name:
+                    stiffness = self._stiffness["shoulder"]
+                    damping = self._damping["shoulder"]
+                elif "waist" in dof_name:
+                    stiffness = self._stiffness["waist"]
+                    damping = self._damping["waist"]
+                elif "elbow" in dof_name:
+                    stiffness = self._stiffness["elbow"]
+                    damping = self._damping["elbow"]
+                elif "wrist" in dof_name:
+                    stiffness = self._stiffness["wrist"]
+                    damping = self._damping["wrist"]
+                elif 'hand' in dof_name:
+                    stiffness = self._stiffness["hand"]
+                    damping = self._damping["hand"]
+                else:
+                    pass
+
+                dof_prop["stiffness"][i] = stiffness
+                dof_prop["damping"][i] = damping
+            # dof_prop["stiffness"] = [500 for _ in range(12)] + [300 for _ in range(7)] + [200 for _ in range(self._num_actions_wrist)] + [100 for _ in range(self._num_actions_hand)] + [300 for _ in range(4)] + [200 for _ in range(self._num_actions_wrist)] + [100 for _ in range(self._num_actions_hand)]
+            # dof_prop["damping"] = [50 for _ in range(12)] + [30 for _ in range(7)] + [20 for _ in range(self._num_actions_wrist)] + [10 for _ in range(self._num_actions_hand)] + [30 for _ in range(4)] + [20 for _ in range(self._num_actions_wrist)] + [10 for _ in range(self._num_actions_hand)]
             self.gym.set_actor_dof_properties(env_ptr, humanoid_handle, dof_prop)
                     
         props = self.gym.get_actor_rigid_shape_properties(env_ptr, humanoid_handle)

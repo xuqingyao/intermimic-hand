@@ -369,7 +369,22 @@ class Humanoid_SMPLX(BaseTask):
             body_vel = self._rigid_body_vel[env_ids]
             body_ang_vel = self._rigid_body_ang_vel[env_ids]
             contact_forces = self._contact_forces[env_ids]
-        
+            invalid_pos = ~torch.isfinite(body_pos)
+            if torch.any(invalid_pos):
+                print("invalid pos")
+            invalid_rot = ~torch.isfinite(body_rot)
+            if torch.any(invalid_rot):
+                print("invalid rot")
+            invalid_vel = ~torch.isfinite(body_vel)
+            if torch.any(invalid_vel):
+                print("invalid vel")
+            invalid_angvel = ~torch.isfinite(body_ang_vel)
+            if torch.any(invalid_angvel):
+                print("invalid ang vel")
+            invalid_contact = ~torch.isfinite(contact_forces)
+            if torch.any(invalid_contact):
+                print("invalid contact")
+
         obs = self.compute_humanoid_observations_max(body_pos, body_rot, body_vel, body_ang_vel, self._local_root_obs, self._root_height_obs,
                                                      contact_forces, self._contact_body_ids, ref_obs, self._key_body_ids)
 
@@ -488,7 +503,7 @@ class Humanoid_SMPLX(BaseTask):
             batch_ids = torch.nonzero(invalid_batches).flatten()
             for i in batch_ids:
                 print(f"[ERROR] Env {i.item()} has invalid values")
-                    
+              
         terminated = torch.where(torch.logical_or(invalid_batches, has_failed), torch.ones_like(reset_buf), terminated)
         reset = torch.where(torch.logical_or(progress_buf >= max_episode_length-1, progress_buf - start_times >= rollout_length-1), torch.ones_like(reset_buf), terminated)
         if not enable_early_termination:
