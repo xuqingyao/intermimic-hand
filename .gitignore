@@ -4,3 +4,4 @@ InterAct/
 intermimic/data/assets/
 /home/ubuntu/DATA2/qingyaoxu/InterMimic/checkpoints
 /home/ubuntu/DATA2/qingyaoxu/InterMimic/dataset
+*.pyc
