@@ -25,7 +25,7 @@ env:
   numDoFWrist: 3
   numDoFHand: 7
   g1: True
-  motion_file: /home/ubuntu/qingyaoxu/PHC/data/g1hand/v1/omomo_filter.pkl
+  motion_file: /media/magic-4090/DATA1/PHC/data/g1hand/v1/omomo_filter.pkl
   robotType: 'g1/g1_29dof_with_hand.urdf'
   objectDensity: 200
   localRootObs: False
@@ -35,7 +35,8 @@ env:
   keyIndex: [3, 4, 6, 9, 10, 12, 15, 18, 19, 22, 29, 27, 25, 32, 33, 36, 43, 41, 39]
   contactBodies: ['left_hip_yaw_link', 'left_knee_link', 'left_ankle_roll_link', 'right_hip_yaw_link', 'right_knee_link', 'right_ankle_roll_link', 'torso_link', 'left_shoulder_yaw_link', 'left_elbow_link', 'left_wrist_yaw_link', 'left_hand_index_1_link', 'left_hand_middle_1_link', 'left_hand_thumb_2_link', 'right_shoulder_yaw_link', 'right_elbow_link', 'right_wrist_yaw_link', 'right_hand_index_1_link', 'right_hand_middle_1_link', 'right_hand_thumb_2_link']
   contactIndex: [3, 4, 6, 9, 10, 12, 15, 18, 19, 22, 29, 27, 25, 32, 33, 36, 43, 41, 39]  
-  terminationHeight: 0.3
+  terminationHeight: 0.15
+  terminationHeightUpper: 3.0
   enableEarlyTermination: True
   scaling: 1
   initRootHeight: 0.94

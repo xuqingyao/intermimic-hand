@@ -216,7 +216,7 @@ class Humanoid_G1(Humanoid_SMPLX):
     def _compute_reset(self):
         self.reset_buf[:], self._terminate_buf[:] = self.compute_humanoid_reset(self.reset_buf, self.progress_buf, self.obs_buf,
                                                                                 self._rigid_body_pos, self.max_episode_length[self.data_id],
-                                                                                self._enable_early_termination, self._termination_heights, self.start_times, 
+                                                                                self._enable_early_termination, self._termination_heights, self._termination_heights_upper, self.start_times, 
                                                                                 self.rollout_length
                                                                                 )
         return
@@ -234,6 +234,21 @@ class Humanoid_G1(Humanoid_SMPLX):
             body_vel = self._rigid_body_vel[env_ids]
             body_ang_vel = self._rigid_body_ang_vel[env_ids]
             contact_forces = self._contact_forces[env_ids]
+            invalid_pos = ~torch.isfinite(body_pos)
+            if torch.any(invalid_pos):
+                print("invalid pos")
+            invalid_rot = ~torch.isfinite(body_rot)
+            if torch.any(invalid_rot):
+                print("invalid rot")
+            invalid_vel = ~torch.isfinite(body_vel)
+            if torch.any(invalid_vel):
+                print("invalid vel")
+            invalid_angvel = ~torch.isfinite(body_ang_vel)
+            if torch.any(invalid_angvel):
+                print("invalid ang vel")
+            invalid_contact = ~torch.isfinite(contact_forces)
+            if torch.any(invalid_contact):
+                print("invalid contact")
         
         obs = self.compute_humanoid_observations_max(body_pos, body_rot, body_vel, body_ang_vel, self._local_root_obs,
                                                 self._root_height_obs,

@@ -204,6 +204,8 @@ class Humanoid_SMPLX(BaseTask):
     def _build_termination_heights(self):
         self._termination_heights = 0.3
         self._termination_heights = to_torch(self._termination_heights, device=self.device)
+        self._termination_heights_upper = 3.0
+        self._termination_heights_upper = to_torch(self._termination_heights_upper, device=self.device)
         return
 
     def get_num_amp_obs(self):
@@ -337,7 +339,7 @@ class Humanoid_SMPLX(BaseTask):
     def _compute_reset(self):
         self.reset_buf[:], self._terminate_buf[:] = self.compute_humanoid_reset(self.reset_buf, self.progress_buf, self.obs_buf,
                                                                                 self._rigid_body_pos, self.max_episode_length[self.data_id],
-                                                                                self._enable_early_termination, self._termination_heights, self.start_times, 
+                                                                                self._enable_early_termination, self._termination_heights, self._termination_heights_upper, self.start_times, 
                                                                                 self.rollout_length
                                                                                 )
         return
@@ -486,14 +488,17 @@ class Humanoid_SMPLX(BaseTask):
         return
 
     def compute_humanoid_reset(self, reset_buf, progress_buf, obs_buf, rigid_body_pos,
-                               max_episode_length, enable_early_termination, termination_heights, 
+                               max_episode_length, enable_early_termination, termination_heights, termination_height_upper,
                                start_times, rollout_length):
         terminated = torch.zeros_like(reset_buf)
 
         body_height = rigid_body_pos[:, 0, 2] # root height
         body_fall = body_height < termination_heights# [4096] 
         has_failed = body_fall.clone()
-        has_failed *= (progress_buf > 1)
+        body_fly = body_height > termination_height_upper
+        has_failed = torch.logical_or(body_fall, body_fly)
+        has_failed *= (progress_buf > 1)          
+
         invalid_obs = ~torch.isfinite(obs_buf)  # True where obs is NaN or infinite
         invalid_batches = torch.any(invalid_obs, dim=1)  # Check if any invalid number in each batch (B, N)
         # if torch.any(invalid_obs):
@@ -503,6 +508,20 @@ class Humanoid_SMPLX(BaseTask):
             batch_ids = torch.nonzero(invalid_batches).flatten()
             for i in batch_ids:
                 print(f"[ERROR] Env {i.item()} has invalid values")
+                camera_props = gymapi.CameraProperties()
+                camera_props.width=512
+                camera_props.height=512
+                camera_handle = self.gym.create_camera_sensor(self.envs[i], camera_props)
+                root_pos = self._target_states[i, :3]
+                cam_pos = gymapi.Vec3(root_pos[0] + 2.0, root_pos[1] + 2.0, root_pos[2] + 2.0)
+                cam_target = gymapi.Vec3(root_pos[0], root_pos[1], root_pos[2])
+                self.gym.set_camera_location(camera_handle, self.env[i], cam_pos, cam_target)
+                self.gym.render_all_camera_sensors(self.sim)
+                self.gym.start_access_image_tensors(self.sim)
+                img = self.gym.get_camera_image(self.sim, self.envs[i], camera_handle, gymapi.IMAGE_COLOR)
+                img = np.frombuffer(img, dtype=np.uint8).reshape((camera_props.height, camera_props.width, 4))
+                from PIL import Image
+                Image.fromarray(img).save(f'invalid_{i}.png')
               
         terminated = torch.where(torch.logical_or(invalid_batches, has_failed), torch.ones_like(reset_buf), terminated)
         reset = torch.where(torch.logical_or(progress_buf >= max_episode_length-1, progress_buf - start_times >= rollout_length-1), torch.ones_like(reset_buf), terminated)
